@@ -32,12 +32,14 @@
 iptv-sources/
 ├── 📋 cn_all.m3u8                 # 完整播放列表（46+个频道）
 ├── 📋 cn_all_status.m3u8          # 完整播放列表（46+个频道 含分辨率、流畅度）
+├── 📋 cn_all_best.m3u8            # 本地生成：每个频道精选一条，CCTV 编号在前
 ├── 📡 cn_cctv.m3u8                # 央视频道列表
 ├── 📡 cn_cctv_status.m3u8         # 央视频道列表（含分辨率、流畅度）
 ├── 🏢 cn_province.m3u8            # 卫视频道列表  
 ├── 🏢 cn_province_status.m3u8     # 卫视频道列表（含分辨率、流畅度）  
 ├── 💎 cn_pay.m3u8                 # 付费频道列表
 ├── 💎 cn_pay_status.m3u8          # 付费频道列表（含分辨率、流畅度）
+├── 🛠️ scripts/check_m3u8.py       # 本地校验/去重/择优脚本
 └── 📖 README.md                   # 项目说明文档
 ```
 
@@ -115,6 +117,38 @@ iptv-sources/
    - **MX Player** - 移动端
 
 
+
+
+
+## 🛠️ 本地校验与去重工具
+
+`scripts/check_m3u8.py` 用于在本地校验 M3U8 直播源的有效性、按 URL 去重，每个频道只保留最优一条，并生成 CCTV 编号优先的完整列表 `cn_all_best.m3u8`。
+
+### 常用命令
+
+```bash
+# 校验、去重、每频道择优，生成 cn_all_best.m3u8
+python3 scripts/check_m3u8.py
+```
+
+### 择优规则
+
+1. **分辨率**：高者优先（默认读取同目录 `<输入文件>_status.m3u8` 中的 `[1080]/[720]/[576]` 标签，缺失时回退到频道名中的 `(1080p)` 等标注）
+2. **流畅度**：`[S]` > 未知 > `[F]`
+3. **响应速度**：以上相同时，本次实测响应最快的优先
+
+### 主要参数
+
+| 参数 | 说明 |
+|------|------|
+| `[input]` | 输入文件（默认仓库根目录 `cn_all.m3u8`） |
+| `-o, --output` | 输出文件（默认 `<input>_best.m3u8`，即 `cn_all_best.m3u8`） |
+| `--status FILE` | 指定分辨率标签来源，默认自动查找 `<input>_status.m3u8` |
+| `--timeout` / `--workers` | 单链接超时（默认 10 秒）/ 并发数（默认 32） |
+| `--report FILE` | 输出 CSV 检查报告（含无效、重复、非最佳条目） |
+| `--no-check` | 跳过联网检查，只做去重/择优 |
+
+脚本默认流程：读取仓库根目录的 `cn_all.m3u8` → 有效性检查 → URL 去重 → 每频道择优 → CCTV 编号优先排序 → 写入 `cn_all_best.m3u8`。运行结束会打印每个频道保留的链接、无效链接及原因。
 
 
 
