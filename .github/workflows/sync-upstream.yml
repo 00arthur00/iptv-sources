@@ -12,6 +12,7 @@ permissions:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout fork
         uses: actions/checkout@v4
@@ -30,4 +31,17 @@ jobs:
           else
             echo "::error::合并 upstream/main 时发生冲突，请手动解决"
             exit 1
+          fi
+
+      - name: Regenerate cn_all_best.m3u8
+        run: |
+          python3 scripts/check_m3u8.py --report /tmp/cn_all_best_report.csv
+          old_content=$(git show HEAD:cn_all_best.m3u8 | grep -v '^#CHECKED:' || true)
+          new_content=$(grep -v '^#CHECKED:' cn_all_best.m3u8 || true)
+          if [ "$old_content" = "$new_content" ]; then
+            echo "cn_all_best.m3u8 无实质变化，跳过提交"
+          else
+            git add cn_all_best.m3u8
+            git commit -m "chore: 自动更新 cn_all_best.m3u8"
+            git push origin main
           fi
