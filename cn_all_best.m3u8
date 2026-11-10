@@ -2,7 +2,7 @@
 #PLAYLIST: IPTV Channel List
 #AUTHOR: Jenkins Auto Build
 #DATE: 2026-11-09 14:09:28
-#CHECKED: 2026-11-10 04:12:04 valid=184/199 output=54 source=/home/runner/work/iptv-sources/iptv-sources/cn_all.m3u8
+#CHECKED: 2026-11-10 15:05:25 valid=181/199 output=54 source=/home/runner/work/iptv-sources/iptv-sources/cn_all.m3u8
 #BEST: one per channel
 #ORDER: CCTV ascending first, then other channels
 #EXTINF:-1 tvg-name="CCTV1" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV1.png" group-title="央视频道" response-time="120ms",CCTV-1
@@ -14,7 +14,7 @@ http://113.57.140.161:10081/newlive/live/hls/3/live.m3u8
 #EXTINF:-1 tvg-name="CCTV4" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV4.png" group-title="央视频道" response-time="120ms",CCTV4
 http://113.57.140.161:10081/newlive/live/hls/4/live.m3u8
 #EXTINF:-1 tvg-name="CCTV5" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV5.png" group-title="央视频道" response-time="120ms",CCTV5
-http://221.226.51.220:50081/newlive/live/hls/5/live.m3u8
+http://221.226.51.220:50081/newlive/live/hls/6/live.m3u8
 #EXTINF:-1 tvg-name="CCTV5+" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV5+.png" group-title="体育频道" response-time="67ms",CCTV5+
 http://59.39.89.130:60901/tsfile/live/0016_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-id="CCTV6.cn@HD",CCTV-6 (1080p)
@@ -27,8 +27,8 @@ http://173.208.212.130:8181/720p/cctv8.m3u8
 http://119.39.9.8:9901/tsfile/live/0009_1.m3u8?key=txiptv&playlive=0&authid=0
 #EXTINF:-1 tvg-id="CCTV10.cn@SD",CCTV-10 (720p)
 http://74.91.26.218:82/live/cctv10hd.m3u8
-#EXTINF:-1 tvg-name="CCTV11" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV11.png" group-title="央视频道" response-time="120ms",CCTV11
-http://74.91.26.218:82/live/cctv11hd.m3u8
+#EXTINF:-1 tvg-name="CCTV11" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV11.png" group-title="央视频道" response-time="120ms",CCTV-11
+http://38.75.136.137:98/gslb/dsdqbv/cctv11hd.m3u8?auth=test20251009
 #EXTINF:-1 tvg-name="CCTV12" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV12.png" group-title="央视频道" response-time="120ms",CCTV12
 http://59.39.89.130:60901/tsfile/live/0012_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="CCTV13" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/CCTV13.png" group-title="央视频道" response-time="120ms",CCTV-13
@@ -54,19 +54,19 @@ http://173.208.212.130:8181/720p/dfws.m3u8
 #EXTINF:-1 tvg-name="四川卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/四川卫视.png" group-title="卫视频道" response-time="120ms",四川卫视
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=scwshd
 #EXTINF:-1 tvg-name="天津卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/天津卫视.png" group-title="卫视频道" response-time="120ms",天津卫视
-http://36.136.38.87:9901/tsfile/live/0135_1.m3u8?key=txiptv&playlive=1&authid=0
+http://119.39.9.8:9901/tsfile/live/0135_1.m3u8?key=txiptv&playlive=0&authid=0
 #EXTINF:-1 tvg-name="安徽卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/安徽卫视.png" group-title="卫视频道" response-time="120ms",安徽卫视
 http://59.39.89.130:60901/tsfile/live/0125_6.m3u8?key=txiptv&playlive=1&authid=0
-#EXTINF:-1 tvg-name="山东卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/山东卫视.png" group-title="卫视频道" response-time="120ms",山东卫视
-http://l.cztvcloud.com/channels/lantian/SXshengzhou1/720p.m3u8
+#EXTINF:-1 tvg-name="山东卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/山东卫视.png" group-title="卫视频道" response-time="55ms",山东卫视
+http://36.136.38.87:9901/tsfile/live/0131_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="广东卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/广东卫视.png" group-title="卫视频道" response-time="120ms",广东卫视
-http://74.91.26.218:82/live/gdwshd.m3u8
+http://38.75.136.137:98/gslb/dsdqpub/gdwshd.m3u8?auth=testpub
 #EXTINF:-1 tvg-name="广西卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/广西卫视.png" group-title="卫视频道" response-time="84ms",广西卫视
 http://59.39.89.130:60901/tsfile/live/0125_22.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="江苏卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/江苏卫视.png" group-title="卫视频道" response-time="120ms",江苏卫视
 http://38.75.136.137:98/gslb/dsdqpub/jswshd.m3u8?auth=testpub
 #EXTINF:-1 tvg-name="江西卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/江西卫视.png" group-title="卫视频道" response-time="120ms",江西卫视
-http://107.150.60.122/live/jxwshd.m3u8
+http://38.75.136.137:98/gslb/dsdqpub/jxwshd.m3u8?auth=testpub
 #EXTINF:-1 tvg-name="河北卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/河北卫视.png" group-title="卫视频道" response-time="120ms",河北卫视
 http://38.75.136.137:98/gslb/dsdqpub/hewshd.m3u8?auth=testpub
 #EXTINF:-1 tvg-name="河南卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/河南卫视.png" group-title="卫视频道" response-time="120ms",河南卫视
@@ -78,29 +78,29 @@ http://119.39.9.8:9901/tsfile/live/0126_1.m3u8?key=txiptv&playlive=0&authid=0
 #EXTINF:-1 tvg-name="湖北卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/湖北卫视.png" group-title="卫视频道" response-time="120ms",湖北卫视
 http://107.150.60.122/live/hbwshd.m3u8
 #EXTINF:-1 tvg-name="山西卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/山西卫视.png" group-title="卫视频道" response-time="120ms",山西卫视
-http://36.136.38.87:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=1&authid=0
+http://218.13.170.98:9901/tsfile/live/0118_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="东南卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/东南卫视.png" group-title="卫视频道" response-time="120ms",东南卫视
-http://221.226.51.220:50081/newlive/live/hls/20/live.m3u8
+http://live.zohi.tv/video/s10001-fztv-3/index.m3u8
 #EXTINF:-1 tvg-name="贵州卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/贵州卫视.png" group-title="卫视频道" response-time="88ms",贵州卫视
 http://59.39.89.130:60901/tsfile/live/0125_15.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="辽宁卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/辽宁卫视.png" group-title="卫视频道" response-time="120ms",辽宁卫视
 http://107.150.60.122/live/lnwshd.m3u8
-#EXTINF:-1 tvg-name="重庆卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/重庆卫视.png" group-title="卫视频道" response-time="91ms",重庆卫视
-http://113.25.252.226:9901/tsfile/live/1030_1.m3u8?key=txiptv&playlive=1&authid=0
+#EXTINF:-1 tvg-name="重庆卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/重庆卫视.png" group-title="卫视频道" response-time="120ms",重庆卫视
+http://119.39.9.8:9901/tsfile/live/0142_1.m3u8?key=txiptv&playlive=0&authid=0
 #EXTINF:-1 tvg-name="黑龙江卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/黑龙江卫视.png" group-title="卫视频道" response-time="120ms",黑龙江卫视
 http://107.150.60.122/live/hljwshd.m3u8
 #EXTINF:-1 tvg-name="内蒙古卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/内蒙古卫视.png" group-title="卫视频道" response-time="120ms",内蒙古卫视
 http://63.141.230.178:82/gslb/zbdq5.m3u8?id=nmgws
 #EXTINF:-1 tvg-name="陕西卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/陕西卫视.png" group-title="卫视频道" response-time="120ms",陕西卫视
-http://36.136.38.87:9901/tsfile/live/0136_1.m3u8?key=txiptv&playlive=1&authid=0
+http://59.39.89.130:60901/tsfile/live/0125_23.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="甘肃卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/甘肃卫视.png" group-title="卫视频道" response-time="120ms",甘肃卫视
-http://120.238.84.45:9901/tsfile/live/1079_1.m3u8?key=txiptv&playlive=1&authid=0
+http://119.39.9.8:9901/tsfile/live/0141_1.m3u8?key=txiptv&playlive=0&authid=0
 #EXTINF:-1 tvg-name="吉林卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/吉林卫视.png" group-title="卫视频道" response-time="120ms",吉林卫视
 http://49.87.154.246:85/tsfile/live/0116_1.m3u8?key=txiptv
 #EXTINF:-1 tvg-name="云南卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/云南卫视.png" group-title="卫视频道" response-time="120ms",云南卫视
 http://107.150.60.122/live/ynwshd.m3u8
 #EXTINF:-1 tvg-name="青海卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/青海卫视.png" group-title="卫视频道" response-time="120ms",青海卫视
-http://113.25.252.226:9901/tsfile/live/1043_1.m3u8?key=txiptv&playlive=1&authid=0
+http://124.90.45.52:9901/tsfile/live/0140_1.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="新疆卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/新疆卫视.png" group-title="卫视频道" response-time="120ms",新疆卫视
 http://59.39.89.130:60901/tsfile/live/0125_17.m3u8?key=txiptv&playlive=1&authid=0
 #EXTINF:-1 tvg-name="西藏卫视" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/西藏卫视.png" group-title="卫视频道" response-time="120ms",西藏卫视
@@ -110,6 +110,6 @@ http://38.75.136.137:98/gslb/dsdqpub/btws.m3u8?auth=testpub
 #EXTINF:-1 tvg-name="凤凰资讯" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/凤凰资讯.png" group-title="其他频道" response-time="120ms",凤凰资讯
 http://173.208.234.146/live/fhzx.m3u8
 #EXTINF:-1 tvg-name="凤凰香港" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/凤凰香港.png" group-title="其他频道" response-time="120ms",凤凰香港
-http://173.208.234.146/live/fhxg.m3u8
+https://epg.pw/stream/5f16dc7fc8aaaed3205516c63e4a8c24bca9dbba1181684244729cf574505b0e.m3u8
 #EXTINF:-1 tvg-name="金鹰卡通" tvg-logo="https://gitee.com/mytv-android/myTVlogo/raw/main/img/金鹰卡通.png" group-title="卡通频道" response-time="70ms",金鹰卡通
 http://124.228.160.40:9901/tsfile/live/0011_1.m3u8?key=txiptv&playlive=1&authid=0
