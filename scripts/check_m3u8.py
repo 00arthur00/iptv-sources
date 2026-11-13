@@ -68,11 +68,16 @@ def channel_name(extinf):
     return extinf.rsplit(",", 1)[-1].strip() if "," in extinf else ""
 
 
+CCTV_NAME_RE = re.compile(r"^CCTV\s*-?\s*(\d{1,2})(\+)?(?=$|[\s一-鿿])", re.IGNORECASE)
+
+
 def channel_key(name):
-    """归一化频道标识，用于分组：CCTV-1 (720p) 与 CCTV1 视为同一频道。"""
+    """归一化频道标识：CCTV1、CCTV-1 (720p)、CCTV-2财经 都归为同一频道。"""
     n = re.sub(r"\s*\(\s*\d{3,4}[pi]?\s*\)", "", name.strip())
     n = re.sub(r"\s*\(\s*(?:4k|hd|sd)\s*\)", "", n, flags=re.IGNORECASE)
-    n = re.sub(r"^CCTV\s*-\s*", "CCTV", n, flags=re.IGNORECASE)
+    m = CCTV_NAME_RE.match(n)
+    if m:
+        return f"CCTV{int(m.group(1))}{'+' if m.group(2) else ''}"
     return n.upper()
 
 
