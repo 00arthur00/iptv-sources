@@ -6,20 +6,24 @@
     python3 scripts/check_m3u8.py                 # 默认：读 cn_all.m3u8，写 cn_all_best.m3u8
     python3 scripts/check_m3u8.py -o xxx.m3u8     # 自定义输出
     python3 scripts/check_m3u8.py --no-check      # 只去重/择优，不联网检查
+    python3 scripts/check_m3u8.py --probe         # 用 ffprobe 实测每个源的分辨率（较慢）
     python3 scripts/check_m3u8.py --report r.csv  # 额外输出 CSV 报告
 
-择优规则：分辨率高者优先（从 <input>_status.m3u8 的 [1080]/[720]/[576] 标签读取，
-找不到时回退到 EXTINF 里的 “(1080p)” 等标注），其次流畅度 S > 未知 > F，
-最后比较本次实测的响应时间，越快越好。
+择优规则：分辨率高者优先（--probe 时以 ffprobe 实测为准；否则从 <input>_status.m3u8
+的 [1080]/[720]/[576] 标签读取，找不到时回退到 EXTINF 里的 “(1080p)” 等标注），
+其次流畅度 S > 未知 > F，最后比较本次实测的响应时间，越快越好。
 """
 
 import argparse
 import concurrent.futures
 import csv
+import json
 import os
 import re
+import shutil
 import socket
 import ssl
+import subprocess
 import sys
 import time
 import urllib.error
@@ -152,11 +156,38 @@ def check_url(url, timeout):
     return False, "未知错误", 0.0
 
 
-def best_rank(item, qmap):
+def probe_resolution(url, timeout):
+    """用 ffprobe 读取首个分片，返回视频高度（如 1080），失败返回 0。"""
+    try:
+        proc = subprocess.run(
+            ["ffprobe", "-v", "error", "-select_streams", "v:0",
+             "-show_entries", "stream=width,height", "-of", "json",
+             "-rw_timeout", str(int(timeout * 1_000_000)), url],
+            capture_output=True, text=True, timeout=timeout + 2,
+        )
+        data = json.loads(proc.stdout or "{}")
+    except Exception:
+        return 0
+    streams = data.get("streams") or []
+    if not streams:
+        for prog in data.get("programs") or []:
+            streams = prog.get("streams") or []
+            if streams:
+                break
+    for s in streams:
+        h = s.get("height")
+        if isinstance(h, int) and h > 0:
+            return h
+    return 0
+
+
+def best_rank(item, qmap, probe_map=None):
     """择优排序键（越小越好）：分辨率降序、流畅度 S > 未知 > F、实测响应时间升序。"""
     extinf, url, _detail, elapsed = item
     name = channel_name(extinf)
     res, flag = qmap.get(normalize_url(url), (0, ""))
+    if probe_map and probe_map.get(normalize_url(url)):
+        res = probe_map[normalize_url(url)]  # 实测分辨率优先
     if res == 0:
         res = quality_from_name(name)
     flag_rank = {"S": 2, "": 1, "F": 0}.get(flag, 1)
@@ -200,6 +231,8 @@ def main():
     ap.add_argument("--workers", type=int, default=32, help="并发数（默认 32）")
     ap.add_argument("--report", help="把检查结果写入 CSV 报告")
     ap.add_argument("--no-check", action="store_true", help="只去重/择优，不联网检查")
+    ap.add_argument("--probe", action="store_true",
+                    help="用 ffprobe 实测每个源的实际分辨率（需安装 ffmpeg，较慢且耗流量）")
     args = ap.parse_args()
 
     header, entries = parse_playlist(args.input)
@@ -253,6 +286,32 @@ def main():
         ok, detail, elapsed = results.get(url, (True, "未检查", 0.0))
         (valid if ok else invalid).append((extinf, url, detail, elapsed))
 
+    # 3.5) 可选：用 ffprobe 实测分辨率（以实测值优先，失败时回退到 status 标签）
+    probe_map = {}
+    probe_total = 0
+    if args.probe:
+        if shutil.which("ffprobe") is None:
+            print("错误：--probe 需要 ffprobe，请先安装 ffmpeg", file=sys.stderr)
+            return 2
+        urls = [u for _, u, _, _ in valid]
+        probe_total = len(urls)
+        probe_workers = max(1, min(args.workers, 16))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=probe_workers) as pool:
+            futures = {pool.submit(probe_resolution, u, args.timeout): u for u in urls}
+            done = 0
+            for fut in concurrent.futures.as_completed(futures):
+                u = futures[fut]
+                try:
+                    res = fut.result()
+                except Exception:
+                    res = 0
+                if res:
+                    probe_map[normalize_url(u)] = res
+                done += 1
+                if done % 25 == 0 or done == len(futures):
+                    print(f"  分辨率探测 {done}/{len(futures)} ...", file=sys.stderr)
+        print(f"分辨率实测成功 {len(probe_map)}/{probe_total} 条", file=sys.stderr)
+
     # 4) 每个频道只保留最优的一条
     valid_before_best = len(valid)
     valid_snapshot = list(valid)  # 供报告使用（含被择优移除的条目）
@@ -263,16 +322,19 @@ def main():
         groups.setdefault(channel_key(channel_name(item[0])), []).append(i)
     kept = [True] * len(valid)
     for key, idxs in sorted(groups.items()):
-        best_i = min(idxs, key=lambda i: best_rank(valid[i], qmap))
+        best_i = min(idxs, key=lambda i: best_rank(valid[i], qmap, probe_map))
         for i in idxs:
             kept[i] = i == best_i
             if i != best_i:
                 dropped_best.append((valid[i][0], valid[i][1], valid[best_i][1]))
         item = valid[best_i]
         res, flag = qmap.get(normalize_url(item[1]), (0, ""))
+        probed = probe_map.get(normalize_url(item[1]))
+        if probed:
+            res = probed
         if res == 0:
             res = quality_from_name(channel_name(item[0]))
-        best_groups[key] = (item, res, flag, len(idxs))
+        best_groups[key] = (item, res, flag, len(idxs), bool(probed))
     removed_n = len(valid) - sum(kept)
     valid = [item for i, item in enumerate(valid) if kept[i]]
 
@@ -288,14 +350,25 @@ def main():
         f.write(f"#CHECKED: {stamp} valid={valid_before_best}/{len(deduped)} "
                 f"output={len(valid)} source={args.input}\n")
         f.write("#BEST: one per channel\n")
+        if args.probe:
+            f.write(f"#PROBE: ffprobe resolution measured {len(probe_map)}/{probe_total}\n")
         f.write("#ORDER: CCTV ascending first, then other channels\n")
         for extinf, url, _, _ in valid:
             f.write(extinf + "\n" + url + "\n")
 
     if args.report:
+        def res_label(extinf, url):
+            norm = normalize_url(url)
+            if probe_map.get(norm):
+                return f"{probe_map[norm]}p(实测)"
+            res, _ = qmap.get(norm, (0, ""))
+            if res == 0:
+                res = quality_from_name(channel_name(extinf))
+            return f"{res}p" if res else ""
+
         with open(args.report, "w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(["channel", "url", "ok", "detail", "elapsed_ms", "note"])
+            w.writerow(["channel", "url", "ok", "resolution", "detail", "elapsed_ms", "note"])
             valid_pairs = {(extinf, url) for extinf, url, _, _ in valid}
             dropped_map = {(e, u): ku for e, u, ku in dropped_best}
             for extinf, url, detail, elapsed in valid_snapshot + invalid:
@@ -304,7 +377,8 @@ def main():
                 if (extinf, url) in dropped_map:
                     note = f"非最佳，已移除（保留 {dropped_map[(extinf, url)]}）"
                 w.writerow([channel_name(extinf), url, "1" if ok else "0",
-                            detail, f"{elapsed * 1000:.0f}", note])
+                            res_label(extinf, url), detail,
+                            f"{elapsed * 1000:.0f}", note])
             for ch, url, kept_ch in duplicates:
                 w.writerow([ch, url, "", "重复，已移除", "", f"与 {kept_ch} 重复"])
 
@@ -315,6 +389,8 @@ def main():
     print(f"检查（去重后）：{len(deduped)} 条")
     print(f"有效：{valid_before_best} 条    无效：{len(invalid)} 条")
     print(f"每频道择优：{len(best_groups)} 个频道，移除 {removed_n} 条")
+    if args.probe:
+        print(f"分辨率实测：{len(probe_map)}/{probe_total} 条成功，其余回退到 status 标签")
     print(f"输出条目：{len(valid)} 条    {out_path}")
     if args.report:
         print(f"报告：{args.report}")
@@ -326,9 +402,11 @@ def main():
 
     if best_groups:
         print("\n每频道最优：")
-        for key, (item, res, flag, n) in best_groups.items():
+        for key, (item, res, flag, n, probed) in best_groups.items():
             name, url, _, elapsed = item
             qdesc = f"{res}p" if res else "未知分辨率"
+            if probed:
+                qdesc += "(实测)"
             if flag:
                 qdesc += f" [{flag}]"
             print(f"  {key}：{n} 条中保留 {url}  ({qdesc}, {elapsed * 1000:.0f}ms)")
