@@ -7,10 +7,12 @@
     python3 scripts/check_m3u8.py -o xxx.m3u8     # 自定义输出
     python3 scripts/check_m3u8.py --no-check      # 只去重/择优，不联网检查
     python3 scripts/check_m3u8.py --probe         # 用 ffprobe 实测每个源的分辨率（较慢）
+    python3 scripts/check_m3u8.py --probe --prefer-resolution 720   # 优先选 720p 的源
     python3 scripts/check_m3u8.py --report r.csv  # 额外输出 CSV 报告
 
-择优规则：分辨率高者优先（--probe 时以 ffprobe 实测为准；否则从 <input>_status.m3u8
-的 [1080]/[720]/[576] 标签读取，找不到时回退到 EXTINF 里的 “(1080p)” 等标注），
+择优规则：指定 --prefer-resolution N 时优先选该分辨率的源，没有时再按分辨率从高到低；
+分辨率来源（--probe 时以 ffprobe 实测为准，否则从 <input>_status.m3u8 的
+[1080]/[720]/[576] 标签读取，找不到时回退到 EXTINF 里的 “(1080p)” 等标注），
 其次流畅度 S > 未知 > F，最后比较本次实测的响应时间，越快越好。
 """
 
@@ -181,8 +183,9 @@ def probe_resolution(url, timeout):
     return 0
 
 
-def best_rank(item, qmap, probe_map=None):
-    """择优排序键（越小越好）：分辨率降序、流畅度 S > 未知 > F、实测响应时间升序。"""
+def best_rank(item, qmap, probe_map=None, prefer_res=0):
+    """择优排序键（越小越好）：优先命中 prefer_res 的分辨率、其余分辨率降序、
+    流畅度 S > 未知 > F、实测响应时间升序。prefer_res=0 表示不限制分辨率偏好。"""
     extinf, url, _detail, elapsed = item
     name = channel_name(extinf)
     res, flag = qmap.get(normalize_url(url), (0, ""))
@@ -191,7 +194,8 @@ def best_rank(item, qmap, probe_map=None):
     if res == 0:
         res = quality_from_name(name)
     flag_rank = {"S": 2, "": 1, "F": 0}.get(flag, 1)
-    return (-res, -flag_rank, elapsed)
+    prefer = 0 if (prefer_res and res == prefer_res) else 1
+    return (prefer, -res, -flag_rank, elapsed)
 
 
 CCTV_KEY_RE = re.compile(r"^CCTV(\d+)(\+)?$")
@@ -233,6 +237,8 @@ def main():
     ap.add_argument("--no-check", action="store_true", help="只去重/择优，不联网检查")
     ap.add_argument("--probe", action="store_true",
                     help="用 ffprobe 实测每个源的实际分辨率（需安装 ffmpeg，较慢且耗流量）")
+    ap.add_argument("--prefer-resolution", dest="prefer_resolution", type=int, default=0,
+                    help="优先选择该分辨率的源，如 720；没有该分辨率时再按最高分辨率择优（默认 0 不限制）")
     args = ap.parse_args()
 
     header, entries = parse_playlist(args.input)
@@ -322,7 +328,7 @@ def main():
         groups.setdefault(channel_key(channel_name(item[0])), []).append(i)
     kept = [True] * len(valid)
     for key, idxs in sorted(groups.items()):
-        best_i = min(idxs, key=lambda i: best_rank(valid[i], qmap, probe_map))
+        best_i = min(idxs, key=lambda i: best_rank(valid[i], qmap, probe_map, args.prefer_resolution))
         for i in idxs:
             kept[i] = i == best_i
             if i != best_i:
@@ -352,6 +358,8 @@ def main():
         f.write("#BEST: one per channel\n")
         if args.probe:
             f.write(f"#PROBE: ffprobe resolution measured {len(probe_map)}/{probe_total}\n")
+        if args.prefer_resolution:
+            f.write(f"#PREFER: {args.prefer_resolution}p first\n")
         f.write("#ORDER: CCTV ascending first, then other channels\n")
         for extinf, url, _, _ in valid:
             f.write(extinf + "\n" + url + "\n")
@@ -391,6 +399,8 @@ def main():
     print(f"每频道择优：{len(best_groups)} 个频道，移除 {removed_n} 条")
     if args.probe:
         print(f"分辨率实测：{len(probe_map)}/{probe_total} 条成功，其余回退到 status 标签")
+    if args.prefer_resolution:
+        print(f"分辨率偏好：优先 {args.prefer_resolution}p")
     print(f"输出条目：{len(valid)} 条    {out_path}")
     if args.report:
         print(f"报告：{args.report}")
