@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 本地定时更新：同步 upstream -> 实测分辨率 -> 每频道择优（优先 720p）-> 推送 fork
+# 本地定时更新：同步 upstream -> 校验去重 -> 每频道择优 -> 推送 fork
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -7,7 +7,7 @@ git fetch upstream
 git merge --no-edit upstream/main
 git push origin main
 
-python3 scripts/check_m3u8.py --probe --prefer-resolution 720 --report /tmp/cn_all_best_report.csv
+python3 scripts/check_m3u8.py --report /tmp/cn_all_best_report.csv
 
 old=$(git show HEAD:cn_all_best.m3u8 | grep -vE '^#(CHECKED|PROBE|PREFER):' || true)
 new=$(grep -vE '^#(CHECKED|PROBE|PREFER):' cn_all_best.m3u8 || true)
