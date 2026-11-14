@@ -33,6 +33,8 @@ iptv-sources/
 ├── 📋 cn_all.m3u8                 # 完整播放列表（46+个频道）
 ├── 📋 cn_all_status.m3u8          # 完整播放列表（46+个频道 含分辨率、流畅度）
 ├── 📋 cn_all_best.m3u8            # 本地生成：每个频道精选一条，CCTV 编号在前
+├── 📡 ipv6.m3u                    # IPv6 直播源列表（来源：fanmingming/live）
+├── 📡 ipv6_best.m3u               # 本地生成：IPv6 每频道精选一条
 ├── 📡 cn_cctv.m3u8                # 央视频道列表
 ├── 📡 cn_cctv_status.m3u8         # 央视频道列表（含分辨率、流畅度）
 ├── 🏢 cn_province.m3u8            # 卫视频道列表  
@@ -40,6 +42,7 @@ iptv-sources/
 ├── 💎 cn_pay.m3u8                 # 付费频道列表
 ├── 💎 cn_pay_status.m3u8          # 付费频道列表（含分辨率、流畅度）
 ├── 🛠️ scripts/check_m3u8.py       # 本地校验/去重/择优脚本
+├── 🛠️ auto_run.sh                 # 本地定时更新脚本（同步 + 生成 + 推送）
 └── 📖 README.md                   # 项目说明文档
 ```
 
@@ -152,7 +155,7 @@ python3 scripts/check_m3u8.py
 | `--probe` | 用 ffprobe 实测每个源的真实分辨率（需安装 ffmpeg，约 2 分钟并消耗流量；失败自动回退到 status 标签） |
 | `--prefer-resolution N` | 优先选择分辨率为 N（如 720）的源，没有时再按最高分辨率择优 |
 
-脚本默认流程：读取仓库根目录的 `cn_all.m3u8` → 有效性检查 → URL 去重 → 每频道择优 → CCTV 编号优先排序 → 写入 `cn_all_best.m3u8`。运行结束会打印每个频道保留的链接、无效链接及原因。
+脚本默认流程：读取仓库根目录的 `cn_all.m3u8` → 有效性检查 → URL 去重 → 每频道择优 → CCTV 编号优先排序 → 写入 `cn_all_best.m3u8`；`auto_run.sh` 会同时处理 `ipv6.m3u` 并生成 `ipv6_best.m3u8`。运行结束会打印每个频道保留的链接、无效链接及原因。
 
 
 
